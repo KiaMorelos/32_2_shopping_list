@@ -1,43 +1,58 @@
 const express = require("express");
 const router = new express.Router();
 const ExpressError = require("../expressError");
-const items = require("../fakeDb");
+const Item = require("../item");
 
-router.get("/", function(req,res){
-    res.json({items});
+router.get("/", function(req, res, next){
+    // get item list //
+    try{
+        return res.json({ items: Item.getAllItems() });
+    } catch(err){
+        return next(err)
+    }
   });
 
-router.post("/", function(req,res){
-    const newItem = {name : req.body.name, price : req.body.price};
-    items.push(newItem);
-    res.status(201).json({ added: newItem });
+router.post("/", function(req, res, next){
+    // add item to item list //
+    try {
+        const newItem = new Item(req.body.name, req.body.price);
+        return res.status(201).json({ added: newItem });
+    } catch(err){
+        return next(err)
+    }
+    
   });
 
-router.get("/:name", function (req, res) {
-  const itemGet = items.find(item => item.name === req.params.name);
-  if(itemGet === undefined){
-    throw new ExpressError("No item found", 404);
-  }
-  res.json({ item: itemGet });
+router.get("/:name", function (req, res, next) {
+    // get item that matches given name //
+    try {
+        const foundItem = Item.findItem(req.params.name);
+        return res.json({item: foundItem});
+    } catch (err){
+        return next(err)
+    }
+  
 });
 
-router.patch("/:name", function (req, res) {
-    const itemGet = items.find(item => item.name === req.params.name);
-    if(itemGet === undefined){
-      throw new ExpressError("No item found", 404);
+router.patch("/:name", function (req, res, next) {
+    // update item that matches given name //
+    try {
+        const foundItem = Item.updateItem(req.params.name, req.body);
+        return res.json({updated: foundItem})
+    } catch(err){
+        return next(err)
     }
-    itemGet.name = req.body.name;
-    res.json({ updated: itemGet });
   });
 
 
-router.delete("/:name", function (req, res) {
-    const itemGet = items.findIndex(item => item.name === req.params.name);
-    if(itemGet === undefined){
-      throw new ExpressError("No item found", 404);
-    }
-    items.splice(itemGet, 1);
-    res.json({ message: "Deleted" })
+router.delete("/:name", function (req, res, next) {
+    // delete item that matches given name //
+   try {
+    Item.deleteItem(req.params.name);
+    return res.json({message: 'Deleted'})
+   } catch(err){
+        return next(err)
+   }
   });
 
 module.exports = router;

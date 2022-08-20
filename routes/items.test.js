@@ -56,3 +56,27 @@ describe("DELETE /items/:name", () => {
         expect(resp.body).toEqual({message: "Deleted"});
       });
 });
+
+describe("GET /items/:name 404 ERRO", () => {
+    test("404 trying to get item that doesn't exist", async function() {
+        const resp = await request(app).get(`/items/noSuchThing`);
+        expect(resp.statusCode).toBe(404);
+        expect(resp.body).toEqual({error: "No Item Found"});
+      });
+});
+
+describe("PATCH /items/:name 404 ERROR", () => {
+    test("404 trying to patch item that doesn't exist", async function() {
+        const resp = await request(app).patch(`/items/noSuchThing`).send({name: "cheese"});
+        expect(resp.statusCode).toBe(404);
+        expect(resp.body).toEqual({error: "No Item Found"});
+      });
+});
+
+describe("DELETE /items/:name 404 ERROR", () => {
+    test("404 trying to delete item that doesn't exist", async function() {
+        const resp = await request(app).delete(`/items/noSuchThing`);
+        expect(resp.statusCode).toBe(404);
+        expect(resp.body).toEqual({error: "No Item Found"});
+      });
+});
